@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import java.util.UUID
 import javax.inject.Inject
 
-class TaskRepository @Inject constructor(private val db:FirebaseFirestore):TaskService {
+class TaskRepository @Inject constructor(private val db: FirebaseFirestore) : TaskService {
 
     override fun createTask(taskModel: TaskModel.Model): Flow<AppResponse<String>> = callbackFlow {
         try {
@@ -23,18 +23,17 @@ class TaskRepository @Inject constructor(private val db:FirebaseFirestore):TaskS
             }.addOnFailureListener {
                 trySend(AppResponse.Failure(it))
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             trySend(AppResponse.Failure(e))
         }
         awaitClose { close() }
-
     }
 
-    override fun fetchAllTask(): Flow<AppResponse<List<TaskModel>>> = callbackFlow{
+    override fun fetchAllTask(): Flow<AppResponse<List<TaskModel>>> = callbackFlow {
         try {
             trySend(AppResponse.Loading)
-            db.collection("task").get().addOnSuccessListener {
-                val task= it.map { snapshot ->
+            db.collection("task").orderBy("title").get().addOnSuccessListener {
+                val task = it.map { snapshot ->
                     TaskModel(
                         uid = snapshot.id,
                         model = TaskModel.Model(
@@ -49,14 +48,13 @@ class TaskRepository @Inject constructor(private val db:FirebaseFirestore):TaskS
             }.addOnFailureListener {
                 trySend(AppResponse.Failure(it))
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             trySend(AppResponse.Failure(e))
         }
         awaitClose { close() }
-
     }
 
-    override fun deleteTask(id: String): Flow<AppResponse<String>> = callbackFlow{
+    override fun deleteTask(id: String): Flow<AppResponse<String>> = callbackFlow {
         try {
             trySend(AppResponse.Loading)
             db.collection("task").document(id).delete()
@@ -65,17 +63,17 @@ class TaskRepository @Inject constructor(private val db:FirebaseFirestore):TaskS
                 }.addOnFailureListener {
                     trySend(AppResponse.Failure(it))
                 }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             trySend(AppResponse.Failure(e))
         }
-        awaitClose{close()}
+        awaitClose { close() }
     }
 
-    override fun updateTask(taskModel: TaskModel): Flow<AppResponse<String>> = callbackFlow{
+    override fun updateTask(taskModel: TaskModel): Flow<AppResponse<String>> = callbackFlow {
         try {
             trySend(AppResponse.Loading)
 
-            val hasMap = HashMap<String,Any>()
+            val hasMap = HashMap<String, Any>()
             hasMap["title"] = taskModel.model.title
             hasMap["content"] = taskModel.model.content
             hasMap["isComplete"] = taskModel.model.isComplete
@@ -86,10 +84,10 @@ class TaskRepository @Inject constructor(private val db:FirebaseFirestore):TaskS
                 }.addOnFailureListener {
                     trySend(AppResponse.Failure(it))
                 }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             trySend(AppResponse.Failure(e))
         }
-        awaitClose{close()}
+        awaitClose { close() }
     }
 
 

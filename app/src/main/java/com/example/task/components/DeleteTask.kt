@@ -20,24 +20,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.task.data.AppResponse
 import com.example.task.data.view.TaskViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun DeleteTask(isOpen:MutableState<Boolean>,viewModel: TaskViewModel = hiltViewModel()) {
+fun DeleteTask(isOpen: MutableState<Boolean>, viewModel: TaskViewModel = hiltViewModel()) {
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
 
-    if (isOpen.value){
+    if (isLoading) {
+        Dialog(onDismissRequest = { }) {
+            CircularProgressIndicator()
+        }
+    }
+    if (isOpen.value) {
         AlertDialog(
             shape = MaterialTheme.shapes.small,
-            onDismissRequest = {  },
+            onDismissRequest = { },
             dismissButton = {
-                TextButton(onClick = { isOpen.value=false }) {
+                TextButton(onClick = { isOpen.value = false }) {
                     Text(text = "Cancel")
                 }
             },
@@ -45,20 +51,30 @@ fun DeleteTask(isOpen:MutableState<Boolean>,viewModel: TaskViewModel = hiltViewM
                 TextButton(
                     onClick = {
                         scope.launch {
-                            viewModel.deleteTask(viewModel.getDeleteId.value).collect{response->
-                                when(response){
-                                    is AppResponse.Loading->{
-                                        isLoading=true
+                            viewModel.deleteTask(viewModel.getDeleteId.value).collect { response ->
+                                when (response) {
+                                    is AppResponse.Loading -> {
+                                        isLoading = true
                                     }
-                                    is AppResponse.Success->{
-                                        isOpen.value=false
-                                        isLoading=false
-                                        Toast.makeText(context, "Successfully Deleted" , Toast.LENGTH_SHORT).show()
+
+                                    is AppResponse.Success -> {
+                                        isOpen.value = false
+                                        isLoading = false
+                                        Toast.makeText(
+                                            context,
+                                            "Successfully Deleted",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         viewModel.fetchTask()
                                     }
-                                    is AppResponse.Failure->{
-                                        isLoading=false
-                                        Toast.makeText(context, "Sorry Something went wrong" , Toast.LENGTH_SHORT).show()
+
+                                    is AppResponse.Failure -> {
+                                        isLoading = false
+                                        Toast.makeText(
+                                            context,
+                                            "Sorry Something went wrong",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                                 }
                             }
@@ -67,16 +83,9 @@ fun DeleteTask(isOpen:MutableState<Boolean>,viewModel: TaskViewModel = hiltViewM
                     Text(text = "Confirm", color = MaterialTheme.colorScheme.error)
                 }
             },
-            title = { Text(text = "Attention")},
+            title = { Text(text = "Attention") },
             text = {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "Are you sure? Permanently deleted task")
-                    if (isLoading) CircularProgressIndicator()
-                }
-
+                Text(text = "Are you sure? Permanently deleted task")
             }
         )
     }

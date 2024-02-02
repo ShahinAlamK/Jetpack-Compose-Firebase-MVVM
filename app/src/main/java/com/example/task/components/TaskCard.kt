@@ -1,7 +1,9 @@
 package com.example.task.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,18 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskCard(
     index:String,
@@ -34,11 +33,9 @@ fun TaskCard(
     content:String,
     date:String="",
     click:()->Unit,
-    isCheck:Boolean=false,
-    onChangeValue: ((Boolean) -> Unit)?
+    onLongClick:(()->Unit)?=null,
 ) {
 
-    val check = if (isCheck) TextDecoration.LineThrough else TextDecoration.None
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,7 +47,11 @@ fun TaskCard(
             .clip(
                 shape = MaterialTheme.shapes.small
             )
-            .clickable { click() }
+            .combinedClickable(
+                onClick = { click() },
+                onLongClick = {onLongClick!!()}
+
+            )
     ) {
         Row(
             modifier = Modifier
@@ -84,27 +85,20 @@ fun TaskCard(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = title,
-                        textDecoration =check,
                         maxLines = 1,
                         style = MaterialTheme.typography.bodyLarge)
 
                     Text(
                         text = date,
-                        textDecoration =check,
                         maxLines = 1,
                         style = MaterialTheme.typography.bodySmall)
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = content,
-                    textDecoration =check,
                     maxLines = 2,
                     style = MaterialTheme.typography.bodySmall)
             }
-
-            Checkbox(
-                checked = isCheck,
-                onCheckedChange = onChangeValue)
 
         }
     }
